@@ -1,0 +1,245 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum Role {
+  CHARACTER
+  COMPANY
+  ADMIN
+}
+
+enum CharacterStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  PAYMENT_HELD
+  IN_PROGRESS
+  DELIVERED
+  APPROVED
+  DISPUTED
+  CANCELLED
+  REJECTED
+}
+
+enum PricingType {
+  PER_POST
+  PER_CAMPAIGN
+  PER_MONTH
+  CUSTOM
+}
+
+// ─── Core User ────────────────────────────────────────────────────────────────
+
+model User {
+  id                String           @id @default(cuid())
+  supabaseId        String           @unique
+  email             String           @unique
+  role              Role
+  suspended         Boolean          @default(false)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  characterProfile  CharacterProfile?
+  companyProfile    CompanyProfile?
+  bookingsAsCompany Booking[]        @relation("CompanyBookings")
+  reviewsGiven      Review[]         @relation("ReviewsGiven")
+  reviewsReceived   Review[]         @relation("ReviewsReceived")
+  messages          BookingMessage[]
+}
+
+// ─── Character Profile ────────────────────────────────────────────────────────
+
+model CharacterProfile {
+  id               String          @id @default(cuid())
+  userId           String          @unique
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  slug             String          @unique
+  name             String
+  tagline          String
+  bio              String          @db.Text
+  avatarUrl        String?
+
+  status           CharacterStatus @default(PENDING_REVIEW)
+  isAvailable      Boolean         @default(true)
+
+  followerCount    Int             @default(0)
+  engagementRate   Float           @default(0)
+
+  stripeAccountId  String?
+
+  categories       CharacterCategory[]
+  capabilities     CharacterCapability[]
+  pricingTiers     PricingTier[]
+  portfolioItems   PortfolioItem[]
+  bookings         Booking[]       @relation("CharacterBookings")
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+// ─── Company Profile ──────────────────────────────────────────────────────────
+
+model CompanyProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name         String
+  website      String?
+  industry     String?
+  logoUrl      String?
+  description  String?  @db.Text
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Categories & Capabilities ───────────────────────────────────────────────
+
+model Category {
+  id          String              @id @default(cuid())
+  name        String              @unique
+  slug        String              @unique
+  icon        String?
+  description String?
+  characters  CharacterCategory[]
+}
+
+model Capability {
+  id          String                @id @default(cuid())
+  name        String                @unique
+  description String?
+  characters  CharacterCapability[]
+}
+
+// ─── Junction Tables ──────────────────────────────────────────────────────────
+
+model CharacterCategory {
+  characterId  String
+  categoryId   String
+  character    CharacterProfile @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  category     Category         @relation(fields: [categoryId], references: [id])
+
+  @@id([characterId, categoryId])
+}
+
+model CharacterCapability {
+  characterId  String
+  capabilityId String
+  character    CharacterProfile @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  capability   Capability       @relation(fields: [capabilityId], references: [id])
+
+  @@id([characterId, capabilityId])
+}
+
+// ─── Pricing ──────────────────────────────────────────────────────────────────
+
+model PricingTier {
+  id          String           @id @default(cuid())
+  characterId String
+  character   CharacterProfile @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  type        PricingType
+  label       String
+  price       Decimal          @db.Decimal(10, 2)
+  currency    String           @default("USD")
+  description String?
+  includes    String[]
+}
+
+// ─── Portfolio ────────────────────────────────────────────────────────────────
+
+model PortfolioItem {
+  id          String           @id @default(cuid())
+  characterId String
+  character   CharacterProfile @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  imageUrl    String
+  caption     String?
+  order       Int              @default(0)
+  createdAt   DateTime         @default(now())
+}
+
+// ─── Booking ──────────────────────────────────────────────────────────────────
+
+model Booking {
+  id                    String          @id @default(cuid())
+
+  companyId             String
+  company               User            @relation("CompanyBookings", fields: [companyId], references: [id])
+
+  characterId           String
+  character             CharacterProfile @relation("CharacterBookings", fields: [characterId], references: [id])
+
+  status                BookingStatus   @default(PENDING)
+
+  title                 String
+  description           String          @db.Text
+  requirements          String?         @db.Text
+  timeline              String
+
+  budgetAmount          Decimal         @db.Decimal(10, 2)
+  currency              String          @default("USD")
+  platformCommission    Decimal         @db.Decimal(5, 4)
+  stripePaymentIntentId String?
+  stripeTransferId      String?
+
+  requestedDeadline     DateTime?
+  acceptedAt            DateTime?
+  deliveredAt           DateTime?
+  completedAt           DateTime?
+  cancelledAt           DateTime?
+
+  messages              BookingMessage[]
+  reviews               Review[]
+
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+}
+
+// ─── Booking Messages ─────────────────────────────────────────────────────────
+
+model BookingMessage {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+// ─── Reviews ──────────────────────────────────────────────────────────────────
+
+model Review {
+  id         String   @id @default(cuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+
+  subjectId  String
+  subject    User     @relation("ReviewsReceived", fields: [subjectId], references: [id])
+
+  rating     Int
+  comment    String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@unique([bookingId, reviewerId])
+}
