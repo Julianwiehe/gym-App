@@ -4,7 +4,6 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CharacterCard } from "@/components/marketplace/CharacterCard";
-import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/constants";
 import {
   Zap, Search, CreditCard, Rocket,
@@ -16,21 +15,66 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
   Shirt, Cpu, Smile, Gamepad2, Sparkles, Dumbbell, UtensilsCrossed, Plane,
 };
 
-async function getFeaturedCharacters() {
-  return prisma.characterProfile.findMany({
-    where: { status: "APPROVED" },
-    include: {
-      categories: { include: { category: true } },
-      pricingTiers: { take: 1, orderBy: { price: "asc" } },
-    },
-    take: 6,
-    orderBy: { createdAt: "desc" },
-  });
-}
+// ── DEMO DATA ────────────────────────────────────────────────────────────────
+const DEMO_CHARACTERS = [
+  {
+    id: "1", slug: "nova-ai",
+    name: "Nova AI",
+    tagline: "Futuristic fashion icon with a cosmic aesthetic",
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
+    followerCount: 2400000, engagementRate: 4.8, isAvailable: true,
+    categories: [{ category: { name: "Fashion" } }, { category: { name: "Lifestyle" } }],
+    pricingTiers: [{ price: 1200, type: "PER_POST" }],
+  },
+  {
+    id: "2", slug: "byte-queen",
+    name: "Byte Queen",
+    tagline: "Tech reviews & gadget unboxings that actually make sense",
+    avatarUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop",
+    followerCount: 890000, engagementRate: 6.2, isAvailable: true,
+    categories: [{ category: { name: "Tech" } }, { category: { name: "Gaming" } }],
+    pricingTiers: [{ price: 800, type: "PER_POST" }],
+  },
+  {
+    id: "3", slug: "aria-bloom",
+    name: "Aria Bloom",
+    tagline: "Sustainable beauty & skincare for the conscious consumer",
+    avatarUrl: "https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=400&h=400&fit=crop",
+    followerCount: 1700000, engagementRate: 5.4, isAvailable: true,
+    categories: [{ category: { name: "Beauty" } }, { category: { name: "Lifestyle" } }],
+    pricingTiers: [{ price: 950, type: "PER_POST" }],
+  },
+  {
+    id: "4", slug: "iron-atlas",
+    name: "Iron Atlas",
+    tagline: "Elite fitness coaching & supplement reviews",
+    avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400&h=400&fit=crop",
+    followerCount: 650000, engagementRate: 7.1, isAvailable: false,
+    categories: [{ category: { name: "Fitness" } }],
+    pricingTiers: [{ price: 600, type: "PER_POST" }],
+  },
+  {
+    id: "5", slug: "kai-eats",
+    name: "Kai Eats",
+    tagline: "Food adventures from street food to Michelin stars",
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    followerCount: 3100000, engagementRate: 3.9, isAvailable: true,
+    categories: [{ category: { name: "Food" } }, { category: { name: "Travel" } }],
+    pricingTiers: [{ price: 1800, type: "PER_POST" }],
+  },
+  {
+    id: "6", slug: "lumi-world",
+    name: "Lumi World",
+    tagline: "Luxury travel content for aspirational brands",
+    avatarUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop",
+    followerCount: 1200000, engagementRate: 5.8, isAvailable: true,
+    categories: [{ category: { name: "Travel" } }, { category: { name: "Lifestyle" } }],
+    pricingTiers: [{ price: 2200, type: "PER_CAMPAIGN" }],
+  },
+];
+// ─────────────────────────────────────────────────────────────────────────────
 
 export default async function LandingPage() {
-  const featured = await getFeaturedCharacters().catch(() => []);
-
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
@@ -86,38 +130,24 @@ export default async function LandingPage() {
       </section>
 
       {/* Featured Characters */}
-      {featured.length > 0 && (
-        <section className="py-16 px-4 bg-slate-50">
-          <div className="mx-auto max-w-7xl">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold">Featured Characters</h2>
-                <p className="text-slate-500">Top AI characters on the platform</p>
-              </div>
-              <Button variant="outline" asChild>
-                <Link href="/marketplace">View all <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
+      <section className="py-16 px-4 bg-slate-50">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-bold">Featured Characters</h2>
+              <p className="text-slate-500">Top AI characters on the platform</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featured.map((c) => (
-                <CharacterCard
-                  key={c.id}
-                  id={c.id}
-                  slug={c.slug}
-                  name={c.name}
-                  tagline={c.tagline}
-                  avatarUrl={c.avatarUrl}
-                  followerCount={c.followerCount}
-                  engagementRate={c.engagementRate}
-                  isAvailable={c.isAvailable}
-                  categories={c.categories}
-                  pricingTiers={c.pricingTiers}
-                />
-              ))}
-            </div>
+            <Button variant="outline" asChild>
+              <Link href="/marketplace">View all <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
           </div>
-        </section>
-      )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {DEMO_CHARACTERS.map((c) => (
+              <CharacterCard key={c.id} {...c} />
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* How It Works */}
       <section id="how-it-works" className="py-16 px-4 bg-white">
