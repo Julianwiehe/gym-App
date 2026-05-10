@@ -1,194 +1,205 @@
 import Link from "next/link";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { CharacterCard } from "@/components/marketplace/CharacterCard";
-import { CATEGORIES } from "@/lib/constants";
-import {
-  Zap, Search, CreditCard, Rocket,
-  Shirt, Cpu, Smile, Gamepad2, Sparkles, Dumbbell, UtensilsCrossed, Plane,
-  ArrowRight,
-} from "lucide-react";
 
-const CATEGORY_ICONS: Record<string, React.ElementType> = {
-  Shirt, Cpu, Smile, Gamepad2, Sparkles, Dumbbell, UtensilsCrossed, Plane,
-};
-
-// ── DEMO DATA ────────────────────────────────────────────────────────────────
-const DEMO_CHARACTERS = [
-  {
-    id: "1", slug: "nova-ai",
-    name: "Nova AI",
-    tagline: "Futuristic fashion icon with a cosmic aesthetic",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop",
-    followerCount: 2400000, engagementRate: 4.8, isAvailable: true,
-    categories: [{ category: { name: "Fashion" } }, { category: { name: "Lifestyle" } }],
-    pricingTiers: [{ price: 1200, type: "PER_POST" }],
-  },
-  {
-    id: "2", slug: "byte-queen",
-    name: "Byte Queen",
-    tagline: "Tech reviews & gadget unboxings that actually make sense",
-    avatarUrl: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop",
-    followerCount: 890000, engagementRate: 6.2, isAvailable: true,
-    categories: [{ category: { name: "Tech" } }, { category: { name: "Gaming" } }],
-    pricingTiers: [{ price: 800, type: "PER_POST" }],
-  },
-  {
-    id: "3", slug: "aria-bloom",
-    name: "Aria Bloom",
-    tagline: "Sustainable beauty & skincare for the conscious consumer",
-    avatarUrl: "https://images.unsplash.com/photo-1488716820095-cbe80883c496?w=400&h=400&fit=crop",
-    followerCount: 1700000, engagementRate: 5.4, isAvailable: true,
-    categories: [{ category: { name: "Beauty" } }, { category: { name: "Lifestyle" } }],
-    pricingTiers: [{ price: 950, type: "PER_POST" }],
-  },
-  {
-    id: "4", slug: "iron-atlas",
-    name: "Iron Atlas",
-    tagline: "Elite fitness coaching & supplement reviews",
-    avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400&h=400&fit=crop",
-    followerCount: 650000, engagementRate: 7.1, isAvailable: false,
-    categories: [{ category: { name: "Fitness" } }],
-    pricingTiers: [{ price: 600, type: "PER_POST" }],
-  },
-  {
-    id: "5", slug: "kai-eats",
-    name: "Kai Eats",
-    tagline: "Food adventures from street food to Michelin stars",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    followerCount: 3100000, engagementRate: 3.9, isAvailable: true,
-    categories: [{ category: { name: "Food" } }, { category: { name: "Travel" } }],
-    pricingTiers: [{ price: 1800, type: "PER_POST" }],
-  },
-  {
-    id: "6", slug: "lumi-world",
-    name: "Lumi World",
-    tagline: "Luxury travel content for aspirational brands",
-    avatarUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=400&fit=crop",
-    followerCount: 1200000, engagementRate: 5.8, isAvailable: true,
-    categories: [{ category: { name: "Travel" } }, { category: { name: "Lifestyle" } }],
-    pricingTiers: [{ price: 2200, type: "PER_CAMPAIGN" }],
-  },
+const STATS = [
+  { value: "142", unit: "Tage", label: "durchschnittliche Wartezeit auf einen Therapieplatz in Deutschland" },
+  { value: "30%", unit: "", label: "der Deutschen leiden unter psychischen Beschwerden" },
+  { value: "€5", unit: "/Mitarbeiter", label: "pro Monat – steuerlich gefördert über §20b SGB V" },
 ];
-// ─────────────────────────────────────────────────────────────────────────────
 
-export default async function LandingPage() {
+const HOW_IT_WORKS = [
+  { step: "01", title: "Mitarbeiter schreibt", desc: "Anonym, jederzeit, auf Deutsch. Kein Formular, kein Wartezimmer, keine Scham." },
+  { step: "02", title: "Begleiter antwortet", desc: "Warm, menschlich, ohne Bewertung. Hilft beim Nachdenken und Sortieren von Gedanken." },
+  { step: "03", title: "Arbeitgeber investiert", desc: "Einmal einrichten, monatlich zahlen. ROI durch weniger Ausfälle, mehr Wohlbefinden." },
+];
+
+const PROBLEMS = [
+  "Mitarbeiter reden nicht über Stress und Überforderung – weil niemand fragt.",
+  "Externe Beratung ist teuer. Interne HR hat keine Zeit.",
+  "Der nächste freie Therapieplatz: in 5 Monaten.",
+];
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
+    <div className="min-h-screen bg-[#0f0f0f] text-white font-sans">
+      {/* Nav */}
+      <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
+        <span className="text-xl font-bold tracking-tight">mentara</span>
+        <div className="flex items-center gap-6 text-sm text-white/60">
+          <a href="#wie-es-funktioniert" className="hover:text-white transition-colors">Wie es funktioniert</a>
+          <a href="#fuer-arbeitgeber" className="hover:text-white transition-colors">Für Arbeitgeber</a>
+          <Link
+            href="/chat"
+            className="bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-white/90 transition-colors"
+          >
+            Demo testen
+          </Link>
+        </div>
+      </nav>
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-violet-950 via-violet-800 to-indigo-900 text-white py-24 px-4">
-        <div className="relative mx-auto max-w-4xl text-center">
-          <Badge variant="secondary" className="mb-6 bg-violet-700 text-violet-100 border-0">
-            The AI Character Marketplace
-          </Badge>
-          <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
-            Book AI Characters
-            <br />
-            <span className="text-violet-300">for Your Brand</span>
-          </h1>
-          <p className="text-xl text-violet-200 mb-10 max-w-2xl mx-auto">
-            Virtual influencers, models, and agents ready for social media, ads, product launches, and more — available 24/7, infinitely scalable.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-violet-900 hover:bg-violet-50 font-semibold" asChild>
-              <Link href="/marketplace">Browse Characters <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-            <Button size="lg" variant="outline" className="border-violet-400 text-white hover:bg-violet-800" asChild>
-              <Link href="/register">List Your AI Character</Link>
-            </Button>
-          </div>
+      <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
+        <div className="inline-block bg-white/10 text-white/70 text-xs px-3 py-1 rounded-full mb-6 tracking-wide uppercase">
+          KI-Begleitung für mentales Wohlbefinden
+        </div>
+        <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 tracking-tight">
+          Wenn Reden hilft,<br />
+          <span className="text-white/40">aber niemand zuhört.</span>
+        </h1>
+        <p className="text-lg text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+          Mentara ist ein KI-Gesprächsbegleiter auf Deutsch – für Momente, in denen der Kopf voll ist,
+          der nächste Therapieplatz Monate entfernt ist und der Mensch einfach reden möchte.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link
+            href="/chat"
+            className="bg-white text-black px-8 py-4 rounded-xl font-semibold text-base hover:bg-white/90 transition-colors"
+          >
+            Kostenlos ausprobieren
+          </Link>
+          <a
+            href="#fuer-arbeitgeber"
+            className="border border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-base hover:border-white/40 transition-colors"
+          >
+            Für Arbeitgeber →
+          </a>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="py-16 px-4 bg-white">
-        <div className="mx-auto max-w-7xl">
-          <h2 className="text-2xl font-bold text-center mb-2">Browse by Category</h2>
-          <p className="text-slate-500 text-center mb-8">Find the perfect AI character for your niche</p>
-          <div className="grid grid-cols-4 md:grid-cols-8 gap-3">
-            {CATEGORIES.map((cat) => {
-              const Icon = CATEGORY_ICONS[cat.icon] ?? Zap;
-              return (
-                <Link
-                  key={cat.slug}
-                  href={`/marketplace?category=${cat.slug}`}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl border hover:border-violet-400 hover:bg-violet-50 transition-colors group text-center"
-                >
-                  <div className="h-10 w-10 rounded-lg bg-slate-100 group-hover:bg-violet-100 flex items-center justify-center transition-colors">
-                    <Icon className="h-5 w-5 text-slate-600 group-hover:text-violet-600" />
-                  </div>
-                  <span className="text-xs font-medium text-slate-700">{cat.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Characters */}
-      <section className="py-16 px-4 bg-slate-50">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h2 className="text-2xl font-bold">Featured Characters</h2>
-              <p className="text-slate-500">Top AI characters on the platform</p>
+      {/* Stats */}
+      <section className="border-y border-white/10 py-12">
+        <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+          {STATS.map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-4xl font-bold mb-1">
+                {s.value}<span className="text-white/40 text-xl ml-1">{s.unit}</span>
+              </div>
+              <p className="text-white/50 text-sm leading-relaxed">{s.label}</p>
             </div>
-            <Button variant="outline" asChild>
-              <Link href="/marketplace">View all <ArrowRight className="ml-2 h-4 w-4" /></Link>
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {DEMO_CHARACTERS.map((c) => (
-              <CharacterCard key={c.id} {...c} />
-            ))}
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-16 px-4 bg-white">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-2xl font-bold text-center mb-2">How It Works</h2>
-          <p className="text-slate-500 text-center mb-12">From discovery to launch in three steps</p>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: Search, step: "1", title: "Browse & Discover", desc: "Explore hundreds of AI characters by niche, price, and capabilities. Filter to find your perfect match." },
-              { icon: CreditCard, step: "2", title: "Book & Brief", desc: "Submit your campaign brief and budget. Our escrow system holds payment until you approve the deliverables." },
-              { icon: Rocket, step: "3", title: "Launch & Scale", desc: "Receive content, approve it, and launch. Rate the character and rebook for future campaigns." },
-            ].map(({ icon: Icon, step, title, desc }) => (
-              <div key={step} className="relative flex flex-col items-center text-center">
-                <div className="h-14 w-14 rounded-2xl bg-violet-100 flex items-center justify-center mb-4">
-                  <Icon className="h-7 w-7 text-violet-600" />
-                </div>
-                <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center">
-                  {step}
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{title}</h3>
-                <p className="text-sm text-slate-500">{desc}</p>
+      {/* Problem */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <h2 className="text-3xl font-bold mb-12 text-center">Das Problem kennt jeder Arbeitgeber.</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {PROBLEMS.map((p) => (
+            <div key={p} className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center mb-4">
+                <span className="text-red-400 text-lg font-bold">✕</span>
+              </div>
+              <p className="text-white/70 leading-relaxed">{p}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="wie-es-funktioniert" className="bg-white/5 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl font-bold mb-4 text-center">Wie Mentara funktioniert</h2>
+          <p className="text-white/50 text-center mb-14 max-w-xl mx-auto">
+            Kein Therapeut, kein Arzt – ein Begleiter. Warm, verfügbar, kein Urteil.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {HOW_IT_WORKS.map((item) => (
+              <div key={item.step}>
+                <div className="text-6xl font-bold text-white/10 mb-4">{item.step}</div>
+                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                <p className="text-white/60 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Banner */}
-      <section className="py-16 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 text-white">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold mb-4">Are You an AI Character?</h2>
-          <p className="text-violet-200 mb-8 text-lg">
-            List your AI persona, showcase your portfolio, and get discovered by brands looking for the next generation of influencers.
+      {/* Demo CTA */}
+      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-12">
+          <h2 className="text-3xl font-bold mb-4">Probiere es jetzt aus.</h2>
+          <p className="text-white/50 mb-8 max-w-lg mx-auto">
+            Keine Anmeldung. Kein Abo. Einfach schreiben und sehen wie es sich anfühlt.
           </p>
-          <Button size="lg" className="bg-white text-violet-900 hover:bg-violet-50 font-semibold" asChild>
-            <Link href="/register">Join as AI Character — It&apos;s Free</Link>
-          </Button>
+          <Link
+            href="/chat"
+            className="bg-white text-black px-8 py-4 rounded-xl font-semibold text-base hover:bg-white/90 transition-colors inline-block"
+          >
+            Demo öffnen →
+          </Link>
         </div>
       </section>
 
-      <Footer />
+      {/* For employers */}
+      <section id="fuer-arbeitgeber" className="border-t border-white/10 py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="text-xs text-white/40 uppercase tracking-widest mb-4">Für Arbeitgeber</div>
+              <h2 className="text-3xl font-bold mb-6 leading-tight">
+                Betriebliche Gesundheitsförderung,<br />die wirklich genutzt wird.
+              </h2>
+              <p className="text-white/60 leading-relaxed mb-6">
+                Mentara lässt sich als BGF-Maßnahme nach §20b SGB V einsetzen –
+                steuerlich gefördert, einfach einzurichten, und dein Team nutzt es tatsächlich.
+              </p>
+              <ul className="space-y-3 text-white/70">
+                {[
+                  "€5 pro Mitarbeiter/Monat – alles inklusive",
+                  "Keine IT-Integration nötig – läuft im Browser",
+                  "Anonyme Nutzung – keine Daten über einzelne Mitarbeiter",
+                  "Onboarding in unter 30 Minuten",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3">
+                    <span className="text-green-400 mt-0.5">✓</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+              <h3 className="font-semibold mb-6 text-lg">Interesse? Schreib uns.</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm text-white/50 block mb-1">Dein Name</label>
+                  <input
+                    type="text"
+                    placeholder="Max Mustermann"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-white/40 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-white/50 block mb-1">Unternehmen & Mitarbeiterzahl</label>
+                  <input
+                    type="text"
+                    placeholder="Musterfirma GmbH, ~50 Mitarbeiter"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-white/40 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-white/50 block mb-1">Deine E-Mail</label>
+                  <input
+                    type="email"
+                    placeholder="max@musterfirma.de"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-white/40 text-sm"
+                  />
+                </div>
+                <button className="w-full bg-white text-black py-3 rounded-lg font-semibold hover:bg-white/90 transition-colors">
+                  Gespräch anfragen
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-white/10 py-8 text-center text-white/30 text-sm">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <span className="font-semibold text-white/50">mentara</span>
+          <span>Kein medizinisches Produkt. Kein Ersatz für professionelle Therapie.</span>
+          <span>© 2026</span>
+        </div>
+      </footer>
     </div>
   );
 }

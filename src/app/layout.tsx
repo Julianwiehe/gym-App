@@ -13,12 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CharacterX — AI Character Marketplace",
+  title: "Mentara — KI-Begleitung für mentales Wohlbefinden",
   description:
-    "Book AI Characters for your brand. Virtual influencers, models, and agents for social media, ads, and more.",
+    "Mentara ist ein KI-Gesprächsbegleiter auf Deutsch – für Momente, in denen der Kopf voll ist und der Mensch einfach reden möchte.",
   openGraph: {
-    title: "CharacterX — AI Character Marketplace",
-    description: "Book AI Characters for your brand campaigns.",
+    title: "Mentara — KI-Begleitung für mentales Wohlbefinden",
+    description: "Dein persönlicher KI-Begleiter für schwierige Momente.",
     type: "website",
   },
 };
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="de"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-slate-900">
